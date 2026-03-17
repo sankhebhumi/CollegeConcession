@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "homepage": "https://sankhebhumi.github.io/CollegeConcession",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "predeploy": "echo 'Ready to deploy frontend'",
