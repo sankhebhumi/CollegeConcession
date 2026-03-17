@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Student Dashboard</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="../css/style.css">
+
+</head>
+
+<body style="background-color:#f2f2f2;">
+
+<div class="container mt-5">
+
+<h2 class="text-primary mb-4">Student Dashboard</h2>
+
+<div class="card p-4 shadow">
+
+<div class="d-grid gap-3">
+
+<button onclick="goApply()" class="btn btn-success">
+Apply for Railway Concession
+</button>
+
+<button onclick="goStatus()" class="btn btn-primary">
+Check Application Status
+</button>
+
+<button onclick="logout()" class="btn btn-danger">
+Logout
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function goApply(){
+window.location.href = "apply.html";
+}
+
+function goStatus(){
+window.location.href = "status.html";
+}
+
+function logout(){
+window.location.href = "login.html";
+}
+
+</script>
+
+</body>
+
+</html>

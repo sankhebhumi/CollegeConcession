@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Status</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-icon">🚆</span>
+                Concession
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    Dashboard
+                </a>
+                <a href="apply.html" class="nav-link">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Apply Now
+                </a>
+                <a href="status.html" class="nav-link active">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    Application Status
+                </a>
+            </nav>
+            <div style="padding: 1.5rem;">
+                <button onclick="logout()" class="btn btn-outline" style="width: 100%;">Log Out</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div style="font-weight: 500;" id="user-greeting">Loading...</div>
+                <button id="theme-toggle" class="btn btn-outline btn-sm" style="border-radius: 50%;">🌙</button>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <h2>Application Status</h2>
+                    <p style="color: var(--text-muted);">Track your past and current concession requests.</p>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th># ID</th>
+                                <th>Route</th>
+                                <th>Date Applied</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="status-table-body">
+                            <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div class="qr-modal" id="qrModal">
+        <div class="qr-card">
+            <h3 style="margin-bottom:0.5rem;">Approved E-Pass</h3>
+            <p style="color:var(--text-muted); font-size:0.875rem;">Show this QR during ticket booking</p>
+            <div id="qrcode"></div>
+            <p id="qr-route" style="font-weight:600; margin: 1rem 0; font-size:1.1rem;"></p>
+            <button class="btn btn-outline" onclick="closeQRModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupThemeToggle();
+            currentUser = checkAuth('student');
+            if(!currentUser) return;
+            
+            document.getElementById('user-greeting').innerText = `Hello, ${currentUser.name}`;
+            
+            const res = await apiCall(`/applications/${currentUser.id}`);
+            const tbody = document.getElementById('status-table-body');
+            
+            if(res.success && res.applications) {
+                if(res.applications.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:3rem;">You haven't applied for a concession yet. <br><br> <a href="apply.html" class="btn btn-primary btn-sm">Apply Now</a></td></tr>`;
+                } else {
+                    tbody.innerHTML = res.applications.map(app => {
+                        let actionBtn = '-';
+                        if (app.status === 'Approved') {
+                            actionBtn = `<button class="btn btn-primary btn-sm" onclick="showQR('${app.id}', '${app.from_station}', '${app.to_station}')">View QR 🚄</button>`;
+                        }
+                        return `
+                        <tr>
+                            <td>#${1000 + app.id}</td>
+                            <td>${app.from_station} ➔ ${app.to_station}</td>
+                            <td>${new Date(app.date_applied).toLocaleDateString()}</td>
+                            <td><span class="badge ${app.status.toLowerCase()}">${app.status}</span></td>
+                            <td>${actionBtn}</td>
+                        </tr>
+                        `;
+                    }).join('');
+                }
+            }
+        });
+
+        const qrModal = document.getElementById('qrModal');
+        let qrGenerator = null;
+
+        function showQR(id, from, to) {
+            document.getElementById('qr-route').innerText = `${from} ➔ ${to}`;
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            // Create QR code
+            qrGenerator = new QRCode(qrContainer, {
+                text: `Concession ID: ${id}\nStudent: ${currentUser.name}\nRoll: ${currentUser.roll_no}\nRoute: ${from} to ${to}\nStatus: VALID`,
+                width: 180,
+                height: 180,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            
+            qrModal.classList.add('active');
+        }
+
+        function closeQRModal() {
+            qrModal.classList.remove('active');
+        }
+    </script>
+</body>
+</html>

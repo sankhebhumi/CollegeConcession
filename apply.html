@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply Concession</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-icon">🚆</span>
+                Concession
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    Dashboard
+                </a>
+                <a href="apply.html" class="nav-link active">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Apply Now
+                </a>
+                <a href="status.html" class="nav-link">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    Application Status
+                </a>
+            </nav>
+            <div style="padding: 1.5rem;">
+                <button onclick="logout()" class="btn btn-outline" style="width: 100%;">Log Out</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div style="font-weight: 500;" id="user-greeting">Loading...</div>
+                <button id="theme-toggle" class="btn btn-outline btn-sm" style="border-radius: 50%;">🌙</button>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <h2>Apply for Concession</h2>
+                    <p style="color: var(--text-muted);">Fill in your route details below to submit a request.</p>
+                </div>
+
+                <div class="auth-card" style="margin:0; max-width: 600px;">
+                    <form id="apply-form">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="stu-name" class="form-control" disabled style="background:var(--bg-color);opacity:0.7">
+                        </div>
+                        
+                        <div style="display:flex; gap:1rem;">
+                            <div class="form-group" style="flex:1;">
+                                <label>Roll Number</label>
+                                <input type="text" id="stu-roll" class="form-control" disabled style="background:var(--bg-color);opacity:0.7">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Branch</label>
+                                <input type="text" id="stu-branch" class="form-control" disabled style="background:var(--bg-color);opacity:0.7">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                            <label>From Station</label>
+                            <input type="text" id="from_station" class="form-control" required placeholder="e.g., Borivali">
+                        </div>
+
+                        <div class="form-group">
+                            <label>To Station (College)</label>
+                            <input type="text" id="to_station" class="form-control" required placeholder="e.g., Churchgate">
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                            <label>Upload ID Card Photo (Mock UI)</label>
+                            <input type="file" class="form-control" style="padding: 0.5rem;" required>
+                            <small style="color:var(--text-muted); display:block; margin-top:0.3rem">Max size 2MB (jpg/png)</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="apply-btn" style="margin-top: 1rem;">
+                            <span id="apply-text">Submit Application</span>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentUser = null;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setupThemeToggle();
+            currentUser = checkAuth('student');
+            if(!currentUser) return;
+            
+            document.getElementById('user-greeting').innerText = `Hello, ${currentUser.name}`;
+            document.getElementById('stu-name').value = currentUser.name;
+            document.getElementById('stu-roll').value = currentUser.roll_no;
+            document.getElementById('stu-branch').value = currentUser.branch;
+        });
+
+        document.getElementById('apply-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const from_station = document.getElementById('from_station').value;
+            const to_station = document.getElementById('to_station').value;
+            
+            const btnText = document.getElementById('apply-text');
+            btnText.innerHTML = '<span class="spinner"></span> Submitting...';
+            
+            const res = await apiCall('/apply', 'POST', {
+                student_id: currentUser.id,
+                from_station,
+                to_station
+            });
+            
+            btnText.innerHTML = 'Submit Application';
+            
+            if (res.success) {
+                showToast('Application submitted successfully!');
+                document.getElementById('apply-form').reset();
+                setTimeout(() => window.location.href = 'status.html', 1500);
+            } else {
+                showToast(res.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

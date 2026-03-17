@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Admin Panel</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+</head>
+
+<body>
+
+<div class="container mt-5">
+
+<h2>Admin Panel</h2>
+
+<table class="table">
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Roll</th>
+<th>From</th>
+<th>To</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="tableBody"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+function loadApplications(){
+
+fetch("/applications")
+.then(res=>res.json())
+.then(data=>{
+
+let rows="";
+
+data.forEach(app=>{
+
+rows+=`
+<tr>
+<td>${app.name}</td>
+<td>${app.roll}</td>
+<td>${app.from_station}</td>
+<td>${app.to_station}</td>
+<td>${app.status}</td>
+
+<td>
+<button onclick="updateStatus(${app.id},'Approved')" class="btn btn-success btn-sm">
+Approve
+</button>
+
+<button onclick="updateStatus(${app.id},'Rejected')" class="btn btn-danger btn-sm">
+Reject
+</button>
+</td>
+
+</tr>
+`;
+
+});
+
+document.getElementById("tableBody").innerHTML=rows;
+
+});
+
+}
+
+function updateStatus(id,status){
+
+fetch("/updateStatus",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({id,status})
+
+})
+.then(()=>{
+
+loadApplications();
+
+});
+
+}
+
+loadApplications();
+
+</script>
+
+</body>
+</html>

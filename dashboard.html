@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-icon">🚆</span>
+                Concession
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-link active">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    Dashboard
+                </a>
+                <a href="apply.html" class="nav-link">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Apply Now
+                </a>
+                <a href="status.html" class="nav-link">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    Application Status
+                </a>
+            </nav>
+            <div style="padding: 1.5rem;">
+                <button onclick="logout()" class="btn btn-outline" style="width: 100%;">Log Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div style="font-weight: 500;" id="user-greeting">Loading...</div>
+                <button id="theme-toggle" class="btn btn-outline btn-sm" style="border-radius: 50%;">🌙</button>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <h2>Overview</h2>
+                    <p style="color: var(--text-muted);">Welcome to the college railway concession portal.</p>
+                </div>
+
+                <div class="grid grid-cols-3">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">📄</div>
+                        <div class="stat-info">
+                            <h3>Total Applications</h3>
+                            <p id="stat-total">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card" style="cursor: pointer;" onclick="window.location.href='apply.html'">
+                        <div class="stat-icon success" style="background: var(--primary); color: white;">+</div>
+                        <div class="stat-info">
+                            <h3 style="color:var(--text-main); font-weight:600; font-size:1rem; margin-top:0.3rem;">New Application</h3>
+                            <p style="font-size:0.875rem; color:var(--text-muted); font-weight:400;">Apply for railway pass</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent applications preview -->
+                <div style="margin-top: 3rem;">
+                    <h3>Recent Status</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Route</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-table-body">
+                                <tr><td colspan="3" style="text-align:center;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupThemeToggle();
+            const user = checkAuth('student');
+            if(!user) return;
+            
+            document.getElementById('user-greeting').innerText = `Hello, ${user.name} (${user.roll_no})`;
+            
+            // Load dashboard data
+            const res = await apiCall(`/applications/${user.id}`);
+            if(res.success && res.applications) {
+                document.getElementById('stat-total').innerText = res.applications.length;
+                
+                const tableBody = document.getElementById('recent-table-body');
+                if(res.applications.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted)">No applications found</td></tr>`;
+                } else {
+                    // Show top 3
+                    const recent = res.applications.slice(0, 3);
+                    tableBody.innerHTML = recent.map(app => `
+                        <tr>
+                            <td>${app.from_station} ➔ ${app.to_station}</td>
+                            <td>${new Date(app.date_applied).toLocaleDateString()}</td>
+                            <td><span class="badge ${app.status.toLowerCase()}">${app.status}</span></td>
+                        </tr>
+                    `).join('');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
