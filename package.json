@@ -2,9 +2,12 @@
   "name": "college-concession-system",
   "version": "1.0.0",
   "description": "",
+  "homepage": "https://sankhebhumi.github.io/CollegeConcession",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
+    "predeploy": "echo 'Ready to deploy frontend'",
+    "deploy": "gh-pages -d public",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,5 +19,8 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
   }
 }
