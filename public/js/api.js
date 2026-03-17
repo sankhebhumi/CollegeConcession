@@ -47,11 +47,6 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// Using a base URL that can be easily changed when deployed
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? '' // Use relative path for local development
-    : 'https://college-concession-backend.onrender.com'; // Replace with actual Render URL later
-
 // Fetch API Wrapper
 async function apiCall(endpoint, method = 'GET', body = null) {
     const options = {
@@ -66,7 +61,7 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     }
     
     try {
-        const response = await fetch(`${API_BASE_URL}/api${endpoint}`, options);
+        const response = await fetch(`/api${endpoint}`, options);
         return await response.json();
     } catch (error) {
         console.error("API Error:", error);
