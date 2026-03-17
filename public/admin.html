@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/api.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-icon">🛡️</span>
+                Admin Panel
+            </div>
+            <nav class="sidebar-nav">
+                <a href="admin.html" class="nav-link active">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    Dashboard
+                </a>
+            </nav>
+            <div style="padding: 1.5rem;">
+                <button onclick="logout()" class="btn btn-outline" style="width: 100%;">Log Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div style="font-weight: 500;" id="user-greeting">Loading...</div>
+                <button id="theme-toggle" class="btn btn-outline btn-sm" style="border-radius: 50%;">🌙</button>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <h2>Admin Overview</h2>
+                    <p style="color: var(--text-muted);">Manage all student concession applications from this dashboard.</p>
+                </div>
+
+                <div class="grid grid-cols-3" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">📁</div>
+                        <div class="stat-info">
+                            <h3>Total</h3>
+                            <p id="stat-total">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">⏳</div>
+                        <div class="stat-info">
+                            <h3>Pending</h3>
+                            <p id="stat-pending">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">✅</div>
+                        <div class="stat-info">
+                            <h3>Approved</h3>
+                            <p id="stat-approved">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:var(--error-bg);color:var(--error)">❌</div>
+                        <div class="stat-info">
+                            <h3>Rejected</h3>
+                            <p id="stat-rejected">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Applications Table -->
+                <div style="margin-top: 3rem;">
+                    <h3>Recent Applications</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Route</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="app-table-body">
+                                <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="qr-modal" id="confirmModal">
+        <div class="qr-card" style="text-align: left;">
+            <h3 id="modal-title">Confirm Action</h3>
+            <p id="modal-text" style="color:var(--text-muted); font-size:0.875rem; margin-top: 0.5rem;"></p>
+            
+            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary btn-sm" id="confirm-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAction = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupThemeToggle();
+            const user = checkAuth('admin');
+            if(!user) return;
+            
+            document.getElementById('user-greeting').innerText = `Admin Office: ${user.username}`;
+            loadData();
+        });
+
+        async function loadData() {
+            const res = await apiCall('/admin/applications');
+            if(res.success) {
+                document.getElementById('stat-total').innerText = res.analytics.total;
+                document.getElementById('stat-pending').innerText = res.analytics.pending;
+                document.getElementById('stat-approved').innerText = res.analytics.approved;
+                document.getElementById('stat-rejected').innerText = res.analytics.rejected;
+
+                const tbody = document.getElementById('app-table-body');
+                if(res.applications.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No completed applications yet.</td></tr>`;
+                } else {
+                    tbody.innerHTML = res.applications.map(app => {
+                        let actionButtons = '-';
+                        if(app.status === 'Pending') {
+                            actionButtons = `
+                                <div style="display:flex; gap:0.5rem">
+                                    <button class="btn btn-success btn-sm" onclick="confirmAction(${app.id}, 'Approved', '${app.name}')">Approve</button>
+                                    <button class="btn btn-danger btn-sm" onclick="confirmAction(${app.id}, 'Rejected', '${app.name}')">Reject</button>
+                                </div>
+                            `;
+                        } else if(app.status === 'Approved') {
+                            actionButtons = `<button class="btn btn-danger btn-sm" onclick="confirmAction(${app.id}, 'Rejected', '${app.name}')">Revoke</button>`;
+                        }
+                        
+                        return `
+                        <tr>
+                            <td>
+                                <div style="font-weight:600">${app.name}</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted)">Roll: ${app.roll_no} | ${app.branch}</div>
+                            </td>
+                            <td>${app.from_station} ➔ ${app.to_station}</td>
+                            <td>${new Date(app.date_applied).toLocaleDateString()}</td>
+                            <td><span class="badge ${app.status.toLowerCase()}">${app.status}</span></td>
+                            <td>${actionButtons}</td>
+                        </tr>
+                        `;
+                    }).join('');
+                }
+            }
+        }
+
+        const modal = document.getElementById('confirmModal');
+        
+        function confirmAction(id, status, name) {
+            currentAction = { id, status };
+            document.getElementById('modal-title').innerText = `${status === 'Approved' ? 'Approve' : 'Reject'} Application`;
+            document.getElementById('modal-text').innerText = `Are you sure you want to mark ${name}'s concession application as ${status}?`;
+            
+            const confirmBtn = document.getElementById('confirm-btn');
+            confirmBtn.className = status === 'Approved' ? 'btn btn-success btn-sm' : 'btn btn-danger btn-sm';
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            currentAction = null;
+        }
+
+        document.getElementById('confirm-btn').addEventListener('click', async () => {
+            if(!currentAction) return;
+            
+            const btn = document.getElementById('confirm-btn');
+            const originalText = btn.innerText;
+            btn.innerHTML = `<span class="spinner"></span>`;
+            
+            const res = await apiCall(`/admin/applications/${currentAction.id}/status`, 'POST', {
+                status: currentAction.status
+            });
+            
+            if(res.success) {
+                showToast(res.message);
+                closeModal();
+                loadData(); // reload table
+            } else {
+                showToast(res.message, 'error');
+                btn.innerHTML = originalText;
+            }
+        });
+    </script>
+</body>
+</html>
