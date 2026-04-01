@@ -5,7 +5,8 @@
   "homepage": "https://sankhebhumi.github.io/CollegeConcession",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node index.js",
+    "build": "node db/init.js",
     "predeploy": "echo 'Ready to deploy frontend'",
     "deploy": "gh-pages -d public",
     "test": "echo \"Error: no test specified\" && exit 1"
