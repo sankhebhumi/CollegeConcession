@@ -10,82 +10,88 @@
 <body>
     <div class="app-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <span class="logo-icon">🛡️</span>
-                Admin Panel
+        <aside class="sidebar glass">
+            <div class="sidebar-header" style="color: var(--primary);">
+                🛡️ Admin Office
             </div>
             <nav class="sidebar-nav">
                 <a href="admin.html" class="nav-link active">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                    Dashboard
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>
+                    Applications
                 </a>
             </nav>
-            <div style="padding: 1.5rem;">
-                <button onclick="logout()" class="btn btn-outline" style="width: 100%;">Log Out</button>
+            <div style="padding: 1.5rem; border-top: 1px solid var(--border);">
+                <button onclick="logout()" class="btn btn-outline btn-sm" style="width: 100%; justify-content: flex-start; gap: 0.5rem; color: var(--error);">
+                    <svg style="width:18px; height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4m7 14l5-5-5-5m5 5H9"></path></svg>
+                    Sign Out
+                </button>
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="topbar">
-                <div style="font-weight: 500;" id="user-greeting">Loading...</div>
-                <button id="theme-toggle" class="btn btn-outline btn-sm" style="border-radius: 50%;">🌙</button>
+            <header class="topbar glass">
+                <div class="user-profile">
+                    <div style="font-weight: 600; font-size: 1.1rem; color: var(--primary);" id="user-greeting">Administrator</div>
+                </div>
+                <div style="display:flex; gap:1rem; align-items:center">
+                    <button id="theme-toggle" class="btn btn-outline btn-sm" style="width:40px; height:40px; border-radius:50%; padding:0; background:var(--surface-color); border:1px solid var(--glass-border)">🌙</button>
+                </div>
             </header>
 
             <div class="page-content">
                 <div class="page-header">
-                    <h2>Admin Overview</h2>
-                    <p style="color: var(--text-muted);">Manage all student concession applications from this dashboard.</p>
+                    <h2>Application Management</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Review and process student railway concession requests.</p>
                 </div>
 
-                <div class="grid grid-cols-3" style="grid-template-columns: repeat(4, 1fr);">
-                    <div class="stat-card">
+                <div class="grid grid-cols-4" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="stat-card glass">
                         <div class="stat-icon primary">📁</div>
                         <div class="stat-info">
                             <h3>Total</h3>
-                            <p id="stat-total">0</p>
+                            <p id="stat-total">--</p>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card glass">
                         <div class="stat-icon warning">⏳</div>
                         <div class="stat-info">
                             <h3>Pending</h3>
-                            <p id="stat-pending">0</p>
+                            <p id="stat-pending">--</p>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card glass">
                         <div class="stat-icon success">✅</div>
                         <div class="stat-info">
                             <h3>Approved</h3>
-                            <p id="stat-approved">0</p>
+                            <p id="stat-approved">--</p>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card glass">
                         <div class="stat-icon" style="background:var(--error-bg);color:var(--error)">❌</div>
                         <div class="stat-info">
                             <h3>Rejected</h3>
-                            <p id="stat-rejected">0</p>
+                            <p id="stat-rejected">--</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Applications Table -->
                 <div style="margin-top: 3rem;">
-                    <h3>Recent Applications</h3>
-                    <div class="table-container">
+                    <h3 style="margin-bottom: 1.25rem; font-weight: 600;">Process Requests</h3>
+                    <div class="table-container glass">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Student</th>
-                                    <th>Route</th>
-                                    <th>Date</th>
+                                    <th>Student Details</th>
+                                    <th>Travel Route</th>
+                                    <th>Submission</th>
                                     <th>Status</th>
-                                    <th>Actions</th>
+                                    <th style="text-align:right;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="app-table-body">
-                                <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+                                <tr><td colspan="5" style="text-align:center;">Loading records...</td></tr>
                             </tbody>
                         </table>
                     </div>

@@ -9,39 +9,41 @@
 </head>
 <body>
     <div class="auth-container">
-        <div class="auth-card">
+        <div class="auth-card glass">
             <div class="auth-header">
                 <div class="logo-icon">🚆</div>
-                <h1>Welcome Back</h1>
-                <p>Login to College Concession portal</p>
+                <h1>College Concession</h1>
+                <p>Welcome back! Please login to your account</p>
             </div>
 
             <div class="role-toggle">
-                <button class="role-btn active" id="btn-student" onclick="setRole('student')">Student</button>
-                <button class="role-btn" id="btn-admin" onclick="setRole('admin')">Admin</button>
+                <button class="role-btn active" id="btn-student" onclick="setRole('student')">Student Profile</button>
+                <button class="role-btn" id="btn-admin" onclick="setRole('admin')">Administrator</button>
             </div>
 
             <form id="login-form">
                 <div class="form-group">
                     <label id="username-label">Roll Number</label>
-                    <input type="text" id="username" class="form-control" required placeholder="Enter roll number">
+                    <input type="text" id="username" class="form-control" required placeholder="e.g. 2021CS101">
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="password" class="form-control" required placeholder="Enter password">
+                    <label>Security Password</label>
+                    <input type="password" id="password" class="form-control" required placeholder="••••••••">
                 </div>
                 <button type="submit" class="btn btn-primary" id="login-submit">
-                    <span id="login-text">Sign In</span>
+                    <span id="login-text">Sign In to Portal</span>
                 </button>
             </form>
             
-            <div style="margin-top:20px; text-align:center; font-size: 0.8rem; color:var(--text-muted)">
-                Demo test accounts:<br>
-                Student: 101 / student123<br>
-                Admin: admin / admin123
+            <div class="demo-accs" style="margin-top:2rem; padding:1rem; border-radius:12px; background:rgba(0,0,0,0.03); font-size: 0.85rem; color:var(--text-muted); border:1px dashed var(--border)">
+                <div style="font-weight:600; margin-bottom:0.5rem; color:var(--primary)">Demo Accounts</div>
+                <div style="display:flex; justify-content:space-between">
+                    <span>Student: 101 / student123</span>
+                    <span>Admin: admin / admin123</span>
+                </div>
             </div>
             
-            <button id="theme-toggle" class="btn btn-outline btn-sm" style="position:fixed; top:1rem; right:1rem; border-radius: 50%;">🌙</button>
+            <button id="theme-toggle" class="btn btn-outline btn-sm" style="position:fixed; top:1.5rem; right:1.5rem; width:40px; height:40px; border-radius: 50%; padding:0; display:flex; align-items:center; justify-content:center; background:var(--surface-color); border:1px solid var(--glass-border)">🌙</button>
         </div>
     </div>
 
